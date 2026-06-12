@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-12T17:01:16.605Z",
+  "updated": "2026-06-12T22:16:50.330Z",
   "results": {
     "1": {
       "h": 2,
@@ -14,6 +14,13 @@
       "status": "FT",
       "hn": "South Korea",
       "an": "Czechia"
+    },
+    "3": {
+      "h": 1,
+      "a": 1,
+      "status": "FT",
+      "hn": "Canada",
+      "an": "Bosnia-Herzegovina"
     }
   }
 }
