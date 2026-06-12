@@ -1,4 +1,19 @@
 {
-  "updated": "2026-06-11T21:36:31.028Z",
-  "results": {}
+  "updated": "2026-06-12T13:54:10.128Z",
+  "results": {
+    "1": {
+      "h": 2,
+      "a": 0,
+      "status": "FT",
+      "hn": "Mexico",
+      "an": "South Africa"
+    },
+    "2": {
+      "h": 2,
+      "a": 1,
+      "status": "FT",
+      "hn": "South Korea",
+      "an": "Czech Republic"
+    }
+  }
 }
