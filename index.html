@@ -309,6 +309,16 @@ function resultFor(m){const r=state.results&&state.results[m.match_number];retur
 const SHORT_CITY={'New York/New Jersey':'New York','San Francisco Bay Area':'San Francisco'};
 function shortCity(c){return SHORT_CITY[c]||c;}
 function zLabel(z){return z==='Asia/Kolkata'?'IST (UTC+5:30)':z==='UTC'?'UTC':z.replace(/_/g,' ');}
+const FLAG2={MEX:['#006847','#CE1126'],RSA:['#007A4D','#FFB915'],KOR:['#003478','#C60C30'],CZE:['#11457E','#D7141A'],CAN:['#D52B1E','#B71C13'],BIH:['#002395','#FECB00'],QAT:['#8A1538','#5A0E25'],SUI:['#D52B1E','#B71C13'],BRA:['#009C3B','#FFDF00'],MAR:['#C1272D','#006233'],HAI:['#00209F','#D21034'],SCO:['#0065BD','#003B7A'],USA:['#3C3B6E','#B22234'],PAR:['#D52B1E','#0038A8'],AUS:['#00843D','#FFCD00'],TUR:['#E30A17','#B00611'],GER:['#1a1a1a','#DD0000'],CUR:['#002B7F','#F9E814'],CIV:['#FF8200','#009E60'],ECU:['#FFD100','#0072CE'],NED:['#FF6C00','#21468B'],JPN:['#BC002D','#9A0024'],SWE:['#006AA7','#FECC00'],TUN:['#E70013','#B0000F'],BEL:['#E30613','#FDDA24'],EGY:['#CE1126','#1a1a1a'],IRN:['#239F40','#DA0000'],NZL:['#00247D','#CC142B'],ESP:['#AA151B','#F1BF00'],CPV:['#003893','#CF2027'],KSA:['#006C35','#0A5A2C'],URU:['#4E8FD6','#0038A8'],FRA:['#0055A4','#EF4135'],SEN:['#00853F','#FDEF42'],IRQ:['#CE1126','#1a1a1a'],NOR:['#BA0C2F','#00205B'],ARG:['#75AADB','#F6B40E'],ALG:['#006233','#D21034'],AUT:['#ED2939','#B51E2C'],JOR:['#007A3D','#CE1126'],POR:['#006600','#FF0000'],COD:['#007FFF','#F7D618'],UZB:['#0099B5','#1EB53A'],COL:['#FCD116','#003893'],ENG:['#CF142B','#1F3A8A'],CRO:['#D10000','#171796'],GHA:['#006B3F','#FCD116'],PAN:['#DA121A','#072357']};
+function normN(s){return String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z]/g,'');}
+const NAME2CODE={}; DATA.teams.forEach(t=>{NAME2CODE[normN(t.name)]=t.fifa_code;});
+[['korearepublic','KOR'],['unitedstates','USA'],['iran','IRN'],['ivorycoast','CIV'],['capeverde','CPV'],['turkey','TUR'],['drcongo','COD'],['congodr','COD'],['czechrepublic','CZE']].forEach(p=>{NAME2CODE[p[0]]=p[1];});
+function hexA(h,a){const n=parseInt(h.slice(1),16);return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`;}
+function winnerCode(m,r){ if(!r||r.h===r.a) return null; const hw=r.h>r.a;
+  if(m.home_team_id!=null&&m.away_team_id!=null) return code(hw?m.home_team_id:m.away_team_id);
+  return NAME2CODE[normN(hw?r.hn:r.an)]||null; }
+function winPaint(c){const f=FLAG2[c]||[CCOLOR[c]||'#9c958a'];const c1=f[0],c2=f[1]||f[0];
+  return `linear-gradient(115deg, transparent 0 50%, ${hexA(c1,0.18)} 50% 80%, ${hexA(c2,0.20)} 80% 100%), var(--surface)`;}
 const STAGE_CLASS={'Group Stage':'grp','Round of 32':'r32','Round of 16':'r16','Quarterfinals':'qf','Semifinals':'sf','Third Place Playoff':'third','Final':'final'};
 const STAGE_COLOR={grp:'#9c958a',r32:'#c2a24a',r16:'#c2a24a',qf:'#c2a24a',sf:'#c2a24a',third:'#c2a24a',final:'#d4af37'};
 const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -431,7 +441,8 @@ function renderCalendar(list){
     html+=`<div class="cell${key===todayKey?' today':wknd?' wknd':''}${past?' past':''}"><div class="dnum">${d}</div>`;
     for(const m of dayms){
       const on=show.has(m.id),hl=hlSet.has(m.id),fav=isFav(m);
-      html+=`<button class="chip${on?'':' dim'}${hl&&on?' hl':''}${fav?' fav':''}" style="--c:${STAGE_COLOR[m._cls]}" onclick="openMatch(${m.id})" title="${matchName(m)} — ${venueStr(m)}">${chipHTML(m,state.tz,fav)}</button>`;
+      const wc=winnerCode(m,resultFor(m)); const paint=wc?`background:${winPaint(wc)};`:'';
+      html+=`<button class="chip${on?'':' dim'}${hl&&on?' hl':''}${fav?' fav':''}" style="${paint}" onclick="openMatch(${m.id})" title="${matchName(m)} — ${venueStr(m)}">${chipHTML(m,state.tz,fav)}</button>`;
     }
     html+='</div>';
   }
@@ -459,7 +470,8 @@ function renderList(list){
       const away=`<span class="tm${aCls}">${aFlag}${aName}${aCode}</span>`;
       const mid=r?`<span class="score">${r.h}<span class="dash">–</span>${r.a}</span>`:`<span class="vs">vs</span>`;
       const wd=DOW[weekdayOf(w[0],w[1],w[2])];
-      html+=`<div class="${cls}" style="--c:${STAGE_COLOR[m._cls]}" onclick="openMatch(${m.id})">
+      const wc=winnerCode(m,r); const wpaint=wc?`;background:${winPaint(wc)}`:'';
+      html+=`<div class="${cls}" style="--c:${STAGE_COLOR[m._cls]}${wpaint}" onclick="openMatch(${m.id})">
         <div class="rtime"><b>${timeStr(m,state.tz)}</b><span>${wd} ${w[2]}</span></div>
         <div class="rmatch"><div class="teams">${fav?'<span class="favmark">★</span>':''}${home}${mid}${away}</div>
           <div class="rsub">📍 ${venueStr(m)}${m._g?` · Group ${m._g}`:''}${r?' · '+(r.status||'FT'):''}</div></div>
