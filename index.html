@@ -29,7 +29,7 @@
   *{box-sizing:border-box}
   html,body{margin:0}
   body{font-family:var(--fb);background:var(--bg);color:var(--ink);line-height:1.45;-webkit-font-smoothing:antialiased;overflow-x:hidden}
-  .wrap{max-width:1200px;margin:0 auto;padding:0 18px}
+  .wrap{max-width:1320px;margin:0 auto;padding:0 18px}
   /* ---------- hero ---------- */
   .hero{position:relative;overflow:hidden;background:var(--bg2);border-bottom:1px solid var(--line)}
   .hero::before{content:"";position:absolute;inset:-40% -10% auto;height:460px;background:radial-gradient(50% 70% at 88% -10%,rgba(200,162,61,.20),transparent 62%);pointer-events:none}
@@ -177,6 +177,43 @@
   .cdclear{margin-top:9px;border:0;background:transparent;color:var(--muted);font-size:12px;cursor:pointer;padding:0;text-decoration:underline}
   .cdclear:hover{color:var(--gold)}
   .cdpinned .cdlabel{color:var(--gold)}
+  /* ---------- fluid & responsive ---------- */
+  .wrap{padding-left:clamp(12px,3.2vw,18px);padding-right:clamp(12px,3.2vw,18px)}
+  .stats b{font-size:clamp(26px,5vw,34px)}
+  .cdclock{font-size:clamp(30px,6vw,40px)}
+  .cell{min-height:clamp(88px,12vw,140px)}
+  .cell .dnum{font-size:clamp(11px,2.6vw,15px)}
+  .chip .c-name{font-size:clamp(10.5px,2.6vw,12.5px)}
+  .chip .cc{font-size:clamp(11px,2.8vw,13.5px)}
+  .chip .c-meta{font-size:clamp(9.5px,2.3vw,11px)}
+  .month h2,.daygroup h3{font-size:clamp(15px,3.5vw,21px)}
+  @media (max-width:780px){
+    .toolbar{position:static}
+    .heroinner{padding:20px 0 18px;gap:16px}
+    .countdown{flex:1 1 100%}
+    .toolbar .wrap{gap:8px}
+    .grow{display:none}
+    .field{flex:1 1 calc(50% - 4px);min-width:0}
+    .field select,.field input[type=text]{width:100%;min-width:0}
+    .daygroup h3{position:static}
+  }
+  @media (max-width:860px){
+    .calwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:14px}
+    .calwrap .month{min-width:660px;border:0;box-shadow:none}
+    .cm-city{display:none}
+    .side{min-width:0}
+    .side .sname{overflow-wrap:break-word}
+  }
+  @media (max-width:520px){
+    .field{flex:1 1 100%}
+    .seg{display:flex;width:100%}
+    .seg button{flex:1;justify-content:center}
+    .caltabs{display:flex;width:100%}
+    .caltabs button{flex:1;justify-content:center}
+    .row .rmatch{min-width:0}
+    .matchup{gap:4px}
+    .side .bigflag{font-size:38px}
+  }
   footer{color:var(--muted);font-size:12px;text-align:center;padding:26px 18px 46px}
   footer a{color:var(--accent)}
 </style>
@@ -213,11 +250,7 @@
     <div class="field"><label>Stage</label><select id="stage"><option value="">All</option></select></div>
     <div class="field"><label>Venue / city</label><input type="text" id="q" placeholder="Search city or stadium"></div>
     <div class="field"><label>Time zone</label>
-      <div class="seg" id="tz">
-        <button data-tz="ist" class="on">IST</button>
-        <button data-tz="local">Local</button>
-        <button data-tz="utc">UTC</button>
-      </div>
+      <select id="tz"></select>
     </div>
     <div class="field"><label>View</label>
       <div class="seg" id="view">
@@ -273,6 +306,9 @@ const CCOLOR={MEX:'#006847',RSA:'#007A4D',KOR:'#003478',CZE:'#11457E',CAN:'#D52B
 const TEAM={}; DATA.teams.forEach(t=>TEAM[t.id]=t);
 function teamColor(id){const c=id!=null&&TEAM[id]?TEAM[id].fifa_code:null;return (c&&CCOLOR[c])?CCOLOR[c]:'#9c958a';}
 function resultFor(m){const r=state.results&&state.results[m.match_number];return (r&&typeof r.h==='number'&&typeof r.a==='number')?r:null;}
+const SHORT_CITY={'New York/New Jersey':'New York','San Francisco Bay Area':'San Francisco'};
+function shortCity(c){return SHORT_CITY[c]||c;}
+function zLabel(z){return z==='Asia/Kolkata'?'IST (UTC+5:30)':z==='UTC'?'UTC':z.replace(/_/g,' ');}
 const STAGE_CLASS={'Group Stage':'grp','Round of 32':'r32','Round of 16':'r16','Quarterfinals':'qf','Semifinals':'sf','Third Place Playoff':'third','Final':'final'};
 const STAGE_COLOR={grp:'#9c958a',r32:'#c2a24a',r16:'#c2a24a',qf:'#c2a24a',sf:'#c2a24a',third:'#c2a24a',final:'#d4af37'};
 const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -282,10 +318,11 @@ function groupLetterOf(m){return (m.label&&m.label.indexOf('Group ')===0)?m.labe
 function slotTokens(label){return label?label.split(/\s*vs\s*/i):[];}
 DATA.matches.forEach(m=>{m._g=groupLetterOf(m);m._cls=STAGE_CLASS[m.stage]||'grp';});
 
-function pick(m,tz){return tz==='ist'?m.kickoff_ist:tz==='utc'?m.kickoff_utc:m.kickoff_local;}
-function wall(iso){const x=iso.match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);return {y:+x[1],mo:+x[2],d:+x[3],hh:+x[4],mm:+x[5]};}
-function dateKey(m,tz){const w=wall(pick(m,tz));return `${w.y}-${String(w.mo).padStart(2,'0')}-${String(w.d).padStart(2,'0')}`;}
-function timeStr(m,tz){const w=wall(pick(m,tz));return `${String(w.hh).padStart(2,'0')}:${String(w.mm).padStart(2,'0')}`;}
+const _FMT={};
+function zfmt(z){if(!_FMT[z])_FMT[z]=new Intl.DateTimeFormat('en-GB',{timeZone:z,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false});return _FMT[z];}
+function zparts(m,zone){const z=zone||state.tz;const p={};zfmt(z).formatToParts(new Date(m.kickoff_utc)).forEach(x=>p[x.type]=x.value);let hh=+p.hour;if(hh===24)hh=0;return {y:+p.year,mo:+p.month,d:+p.day,hh,mm:+p.minute};}
+function dateKey(m){const w=zparts(m);return `${w.y}-${String(w.mo).padStart(2,'0')}-${String(w.d).padStart(2,'0')}`;}
+function timeStr(m){const w=zparts(m);return `${String(w.hh).padStart(2,'0')}:${String(w.mm).padStart(2,'0')}`;}
 function weekdayOf(y,mo,d){return new Date(Date.UTC(y,mo-1,d)).getUTCDay();}
 function code(id){return id!=null&&TEAM[id]?TEAM[id].fifa_code:null;}
 function flag(id){const c=code(id);return c&&FLAG[c]?FLAG[c]:'';}
@@ -312,20 +349,20 @@ function chipHTML(m,tz,fav){
     const hl=r.h<r.a?' lose':'', al=r.a<r.h?' lose':'';
     const fh=known?flag(m.home_team_id)+' ':'', fa=known?' '+flag(m.away_team_id):'';
     name=`${star}${fh}<span class="cc${hl}">${hn} ${r.h}</span><span class="dash">–</span><span class="cc${al}">${r.a} ${an}</span>${fa}`;
-    meta=`${m.city} · <span class="stat">${r.status||'FT'}</span>`;
+    meta=`<span class="cm-city">${shortCity(m.city)} · </span><span class="stat">${r.status||'FT'}</span>`;
   }else if(known){
     name=`${star}${flag(m.home_team_id)}${flag(m.away_team_id)} <span class="cc">${code(m.home_team_id)}–${code(m.away_team_id)}</span>`;
-    meta=`${m.city} · ${timeStr(m,tz)}`;
+    meta=`<span class="cm-city">${shortCity(m.city)} · </span>${timeStr(m,tz)}`;
   }else{
     name=`${star}🏆 <span class="cc">${m.label}</span>`;
-    meta=`${m.city} · ${timeStr(m,tz)}`;
+    meta=`<span class="cm-city">${shortCity(m.city)} · </span>${timeStr(m,tz)}`;
   }
   const c1=known?teamColor(m.home_team_id):'var(--gold)', c2=known?teamColor(m.away_team_id):'var(--gold)';
   return `<span class="acc" style="background:linear-gradient(180deg,${c1} 0 50%,${c2} 50% 100%)"></span><span class="cbody"><span class="c-name">${name}</span><span class="c-meta">${meta}</span></span>`;
 }
 
 const STORE={get(k,d){try{const v=localStorage.getItem('wc26_'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('wc26_'+k,JSON.stringify(v));}catch(e){}}};
-const state={tz:'ist',view:'calendar',team:'',group:'',stage:'',q:'',favs:new Set(STORE.get('favs',[])),pin:STORE.get('pin',null),month:(new Date().getMonth()===6?'jul':'jun'),results:{}};
+const state={tz:STORE.get('tz','Asia/Kolkata'),view:'calendar',team:'',group:'',stage:'',q:'',favs:new Set(STORE.get('favs',[])),pin:STORE.get('pin',null),month:(new Date().getMonth()===6?'jul':'jun'),results:{}};
 function isFav(m){return (m.home_team&&state.favs.has(m.home_team))||(m.away_team&&state.favs.has(m.away_team));}
 function toggleFav(name){
   if(state.favs.has(name))state.favs.delete(name);else state.favs.add(name);
@@ -355,7 +392,7 @@ function passFilters(m){
 
 const content=document.getElementById('content');
 function render(){
-  document.getElementById('tzname').textContent=state.tz==='ist'?'IST (UTC+5:30)':state.tz==='utc'?'UTC':'venue-local time';
+  document.getElementById('tzname').textContent=zLabel(state.tz);
   const list=DATA.matches.filter(passFilters);
   document.getElementById('count').innerHTML=`<b>${list.length}</b> of ${DATA.matches.length} matches`;
   renderTeamNote();
@@ -367,7 +404,7 @@ function renderTeamNote(){
   const t=DATA.teams.find(x=>x.name===state.team); if(!t){el.innerHTML='';return;}
   const grp=DATA.matches.filter(m=>m.stage==='Group Stage'&&matchesTeam(m,state.team)).sort((a,b)=>a.kickoff_utc<b.kickoff_utc?-1:1);
   const lines=grp.map(m=>{const opp=m.home_team===t.name?m.away_team:m.home_team;const oppId=m.home_team===t.name?m.away_team_id:m.home_team_id;
-     return `<div class="tnmatch">${flag(oppId)} vs <b>${opp}</b> — ${DOW[(()=>{const w=wall(pick(m,state.tz));return weekdayOf(w.y,w.mo,w.d)})()]} ${timeStr(m,state.tz)} · ${m.city}</div>`;}).join('');
+     return `<div class="tnmatch">${flag(oppId)} vs <b>${opp}</b> — ${DOW[(()=>{const w=zparts(m);return weekdayOf(w.y,w.mo,w.d)})()]} ${timeStr(m)} · ${m.city}</div>`;}).join('');
   const pot=potentialKnockoutFor(t.group).size;
   el.innerHTML=`<div class="tnhead">${FLAG[t.fifa_code]||''} ${t.name} <span class="muted" style="font-size:13px;font-family:var(--fb);font-weight:600">Group ${t.group}</span></div>${lines}<div class="muted" style="margin-top:6px">If they advance, ${pot} Round-of-32 slot${pot===1?'':'s'} could involve Group ${t.group} — highlighted below.</div>`;
 }
@@ -452,17 +489,16 @@ function openMatch(id){
   const r=resultFor(m);
   const center=r?`<span class="res">${r.h}–${r.a}</span><small>${r.status||'FT'} · #${m.match_number}</small>`:`<span>VS</span><small>Match #${m.match_number}</small>`;
   document.getElementById('m_matchup').innerHTML=`${sideHTML(m,'h',r)}<div class="vsbox">${center}</div>${sideHTML(m,'a',r)}`;
-  const off=m.kickoff_local.slice(19);
+  const extra=(state.tz!=='Asia/Kolkata'&&state.tz!=='UTC')?`<div class="vrow"><span class="k">${zLabel(state.tz)}</span><span class="v">${fmtFull(m,state.tz)}</span></div>`:'';
   document.getElementById('m_body').innerHTML=`
     <div class="venue">📍 <span><b>${m.venue}</b><br><span style="color:var(--muted)">${m.city}</span></span></div>
-    <div class="vrow"><span class="k">India (IST)</span><span class="v">${fmtFull(m,'ist')}</span></div>
-    <div class="vrow"><span class="k">Local</span><span class="v">${fmtFull(m,'local')} <small>UTC${off}</small></span></div>
-    <div class="vrow"><span class="k">UTC</span><span class="v">${fmtFull(m,'utc')}</span></div>`;
+    <div class="vrow"><span class="k">India (IST)</span><span class="v">${fmtFull(m,'Asia/Kolkata')}</span></div>
+    <div class="vrow"><span class="k">UTC</span><span class="v">${fmtFull(m,'UTC')}</span></div>${extra}`;
   document.getElementById('m_gcal').href=gcalLink(m);
   document.getElementById('m_pin').textContent=(state.pin===m.id)?'⏱ Pinned ✓':'⏱ Pin to countdown';
   document.getElementById('overlay').classList.add('open');
 }
-function fmtFull(m,tz){const w=wall(pick(m,tz));return `${DOW[weekdayOf(w.y,w.mo,w.d)]} ${w.d} ${MONTHS[w.mo-1].slice(0,3)} · ${String(w.hh).padStart(2,'0')}:${String(w.mm).padStart(2,'0')}`;}
+function fmtFull(m,zone){const w=zparts(m,zone);return `${DOW[weekdayOf(w.y,w.mo,w.d)]} ${w.d} ${MONTHS[w.mo-1].slice(0,3)} · ${String(w.hh).padStart(2,'0')}:${String(w.mm).padStart(2,'0')}`;}
 function closeModal(){document.getElementById('overlay').classList.remove('open');}
 document.getElementById('m_close').onclick=closeModal;
 document.getElementById('overlay').onclick=e=>{if(e.target.id==='overlay')closeModal();};
@@ -489,6 +525,10 @@ function rebuildFavSelect(){
 function fillSelectors(){
   const tsel=document.getElementById('team');
   DATA.teams.map(t=>t.name).sort().forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;tsel.appendChild(o);});
+  const tzsel=document.getElementById('tz');
+  let zones=[]; try{zones=Intl.supportedValuesOf('timeZone');}catch(e){zones=['Europe/London','Europe/Paris','Europe/Berlin','America/New_York','America/Chicago','America/Denver','America/Los_Angeles','America/Mexico_City','America/Sao_Paulo','Asia/Dubai','Asia/Singapore','Asia/Tokyo','Asia/Shanghai','Australia/Sydney','Africa/Johannesburg'];}
+  tzsel.innerHTML='<option value="Asia/Kolkata">India — IST (UTC+5:30)</option><option value="UTC">UTC</option><option disabled>──────────</option>'+zones.filter(z=>z!=='Asia/Kolkata'&&z!=='UTC').map(z=>`<option value="${z}">${z.replace(/_/g,' ')}</option>`).join('');
+  tzsel.value=state.tz;
   rebuildFavSelect();
   [...new Set(DATA.teams.map(t=>t.group))].sort().forEach(g=>{const o=document.createElement('option');o.value=g;o.textContent='Group '+g;document.getElementById('group').appendChild(o);});
   DATA.stages.slice().sort((a,b)=>a.order-b.order).forEach(s=>{const o=document.createElement('option');o.value=s.name;o.textContent=s.name;document.getElementById('stage').appendChild(o);});
@@ -498,7 +538,7 @@ document.getElementById('team').addEventListener('change',e=>{state.team=e.targe
 document.getElementById('group').addEventListener('change',e=>{state.group=e.target.value;render();});
 document.getElementById('stage').addEventListener('change',e=>{state.stage=e.target.value;render();});
 document.getElementById('q').addEventListener('input',e=>{state.q=e.target.value.trim();render();});
-document.querySelectorAll('#tz button').forEach(b=>b.onclick=()=>{state.tz=b.dataset.tz;document.querySelectorAll('#tz button').forEach(x=>x.classList.remove('on'));b.classList.add('on');render();updateCountdown();});
+document.getElementById('tz').addEventListener('change',e=>{state.tz=e.target.value;STORE.set('tz',state.tz);render();updateCountdown();});
 document.querySelectorAll('#view button').forEach(b=>b.onclick=()=>{state.view=b.dataset.view;document.querySelectorAll('#view button').forEach(x=>x.classList.remove('on'));b.classList.add('on');render();});
 document.getElementById('reset').onclick=()=>{state.team=state.group=state.stage=state.q='';['team','group','stage','q'].forEach(i=>document.getElementById(i).value='');render();};
 document.getElementById('theme').onclick=()=>{const h=document.documentElement;const night=h.dataset.theme!=='dark';h.dataset.theme=night?'dark':'light';document.getElementById('theme').textContent=night?'☀ Day':'☾ Night';STORE.set('theme',night?'dark':'light');};
@@ -540,7 +580,7 @@ render();
 updateCountdown();
 setInterval(updateCountdown,1000);
 loadResults();
-setInterval(loadResults,1800000);
+setInterval(loadResults,300000);
 </script>
 </body>
 </html>
