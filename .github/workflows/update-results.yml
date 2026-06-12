@@ -1,20 +1,25 @@
 name: Update results
+
 on:
   schedule:
-    - cron: "0 2,8,14,20 * * *"
+    # every 5 min during the match window (UTC ~15:00–05:00) ...
+    - cron: "*/5 0-4,15-23 * * *"
+    # ... and hourly the rest of the day
+    - cron: "0 5-14 * * *"
   workflow_dispatch: {}
+
 permissions:
   contents: write
+
 jobs:
   update:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
+      - uses: actions/checkout@v5
       - name: Build results.json
         run: node scripts/update_results.js
+        env:
+          FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
       - name: Commit if changed
         run: |
           git config user.name  "wc2026-bot"
