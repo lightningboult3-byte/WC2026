@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-15T16:22:32.470Z",
+  "updated": "2026-06-15T19:33:58.365Z",
   "results": {
     "1": {
       "h": 2,
@@ -84,6 +84,13 @@
       "status": "FT",
       "hn": "Sweden",
       "an": "Tunisia"
+    },
+    "13": {
+      "h": 0,
+      "a": 0,
+      "status": "FT",
+      "hn": "Spain",
+      "an": "Cape Verde Islands"
     }
   }
 }
