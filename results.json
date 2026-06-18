@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-18T12:04:16.797Z",
+  "updated": "2026-06-18T16:46:38.517Z",
   "results": {
     "1": {
       "h": 2,
@@ -154,6 +154,13 @@
       "status": "FT",
       "hn": "England",
       "an": "Croatia"
+    },
+    "23": {
+      "h": 1,
+      "a": 0,
+      "status": "FT",
+      "hn": "Ghana",
+      "an": "Panama"
     },
     "24": {
       "h": 1,
