@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-22T22:25:08.044Z",
+  "updated": "2026-06-23T10:48:24.600Z",
   "results": {
     "1": {
       "h": 2,
@@ -287,6 +287,27 @@
       "status": "FT",
       "hn": "Argentina",
       "an": "Austria"
+    },
+    "42": {
+      "h": 3,
+      "a": 0,
+      "status": "FT",
+      "hn": "France",
+      "an": "Iraq"
+    },
+    "43": {
+      "h": 3,
+      "a": 2,
+      "status": "FT",
+      "hn": "Norway",
+      "an": "Senegal"
+    },
+    "44": {
+      "h": 1,
+      "a": 2,
+      "status": "FT",
+      "hn": "Jordan",
+      "an": "Algeria"
     }
   }
 }
