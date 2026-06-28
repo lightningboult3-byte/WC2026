@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-27T08:07:15.008Z",
+  "updated": "2026-06-28T10:08:28.470Z",
   "results": {
     "1": {
       "h": 2,
@@ -448,6 +448,48 @@
       "status": "FT",
       "hn": "New Zealand",
       "an": "Belgium"
+    },
+    "67": {
+      "h": 0,
+      "a": 2,
+      "status": "FT",
+      "hn": "Panama",
+      "an": "England"
+    },
+    "68": {
+      "h": 2,
+      "a": 1,
+      "status": "FT",
+      "hn": "Croatia",
+      "an": "Ghana"
+    },
+    "69": {
+      "h": 0,
+      "a": 0,
+      "status": "FT",
+      "hn": "Colombia",
+      "an": "Portugal"
+    },
+    "70": {
+      "h": 3,
+      "a": 1,
+      "status": "FT",
+      "hn": "Congo DR",
+      "an": "Uzbekistan"
+    },
+    "71": {
+      "h": 3,
+      "a": 3,
+      "status": "FT",
+      "hn": "Algeria",
+      "an": "Austria"
+    },
+    "72": {
+      "h": 1,
+      "a": 3,
+      "status": "FT",
+      "hn": "Jordan",
+      "an": "Argentina"
     }
   }
 }
