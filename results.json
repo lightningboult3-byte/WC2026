@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-28T22:43:01.379Z",
+  "updated": "2026-06-29T21:10:45.784Z",
   "results": {
     "1": {
       "h": 2,
@@ -497,6 +497,13 @@
       "status": "FT",
       "hn": "South Africa",
       "an": "Canada"
+    },
+    "74": {
+      "h": 2,
+      "a": 1,
+      "status": "FT",
+      "hn": "Brazil",
+      "an": "Japan"
     }
   }
 }
