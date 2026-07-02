@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-01T20:29:47.511Z",
+  "updated": "2026-07-02T08:30:07.294Z",
   "results": {
     "1": {
       "h": 2,
@@ -546,6 +546,20 @@
       "status": "FT",
       "hn": "England",
       "an": "Congo DR"
+    },
+    "81": {
+      "h": 3,
+      "a": 2,
+      "status": "FT",
+      "hn": "Belgium",
+      "an": "Senegal"
+    },
+    "82": {
+      "h": 2,
+      "a": 0,
+      "status": "FT",
+      "hn": "United States",
+      "an": "Bosnia-Herzegovina"
     }
   }
 }
