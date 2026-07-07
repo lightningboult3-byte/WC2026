@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-06T21:12:27.392Z",
+  "updated": "2026-07-07T10:30:24.104Z",
   "results": {
     "1": {
       "h": 2,
@@ -630,6 +630,13 @@
       "status": "FT",
       "hn": "Portugal",
       "an": "Spain"
+    },
+    "94": {
+      "h": 1,
+      "a": 4,
+      "status": "FT",
+      "hn": "United States",
+      "an": "Belgium"
     }
   }
 }
